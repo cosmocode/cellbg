@@ -47,14 +47,25 @@ class syntax_plugin_cellbg extends SyntaxPlugin
     protected const DEFAULT_COLOR = 'yellow';
 
     /**
-     * Matches a cell opener at the very end of the render buffer that has no background yet
+     * Custom property the color of a cell is written to
+     *
+     * The stylesheet turns the property into the background of the cell. The background has
+     * to come from there, as one set on the cell itself outranks every rule the stylesheet
+     * could use to restyle the cell while the pointer is on its row.
+     *
+     * @var string
+     */
+    protected const COLOR_PROPERTY = '--plugin-cellbg';
+
+    /**
+     * Matches a cell opener at the very end of the render buffer that has no color yet
      *
      * Requiring the opener to be uncolored makes the first color of a cell the one that
      * counts; every further color in that cell stays literal text.
      *
      * @var string
      */
-    protected const CELL_PATTERN = '/(<t[dh]\b(?![^<>]*background-color)[^<>]*)>(\s*)$/';
+    protected const CELL_PATTERN = '/(<t[dh]\b(?![^<>]*' . self::COLOR_PROPERTY . ')[^<>]*)>(\s*)$/';
 
     /**
      * Number of trailing bytes of the render buffer that are searched for a cell opener
@@ -113,7 +124,7 @@ class syntax_plugin_cellbg extends SyntaxPlugin
     /**
      * @inheritdoc
      *
-     * Patches the background into the cell opener the renderer has just written. That opener
+     * Patches the color into the cell opener the renderer has just written. That opener
      * only sits at the end of the buffer when the syntax opens a cell that has no color yet;
      * in every other case the original text is emitted so nothing is lost.
      *
@@ -123,11 +134,11 @@ class syntax_plugin_cellbg extends SyntaxPlugin
     {
         if ($mode != 'xhtml') return false;
 
-        $color = $data === '' ? self::DEFAULT_COLOR : $data;
+        $color = hsc($data === '' ? self::DEFAULT_COLOR : $data);
         $offset = max(0, strlen($renderer->doc) - self::TAIL_LENGTH);
         $tail = preg_replace(
             self::CELL_PATTERN,
-            '$1 style="background-color:' . hsc($color) . ';">$2',
+            '$1 style="' . self::COLOR_PROPERTY . ':' . $color . ';">$2',
             substr($renderer->doc, $offset),
             1,
             $count

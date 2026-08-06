@@ -1,0 +1,18 @@
+/**
+ * Colors the table cells the cellbg syntax has marked
+ *
+ * The syntax hands the color of a cell over as a custom property and leaves the background
+ * to be set here, where the row under the pointer can be styled as well.
+ */
+
+/* the selectors have to outweigh those of the template, which is loaded after this file */
+.dokuwiki table.inline td[style*="--plugin-cellbg"],
+.dokuwiki table.inline th[style*="--plugin-cellbg"] {
+    background-color: var(--plugin-cellbg);
+}
+
+/* mixing in the text color highlights the cell on light as well as on dark templates */
+.dokuwiki table.inline tr:hover td[style*="--plugin-cellbg"],
+.dokuwiki table.inline tr:hover th[style*="--plugin-cellbg"] {
+    background-color: color-mix(in srgb, var(--plugin-cellbg) 88%, currentColor);
+}

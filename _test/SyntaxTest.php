@@ -40,6 +40,17 @@ class SyntaxTest extends DokuWikiTest
     }
 
     /**
+     * The style attribute a cell of the given color has to carry
+     *
+     * @param string $color the expected color
+     * @return string the expected style attribute
+     */
+    protected function style($color)
+    {
+        return 'style="--plugin-cellbg:' . $color . ';"';
+    }
+
+    /**
      * Parse wiki text and collect the instructions contributed by this plugin
      *
      * @param string $wiki wiki text to parse
@@ -84,8 +95,8 @@ class SyntaxTest extends DokuWikiTest
     {
         $cells = $this->cells($this->render("|  {$syntax}content  |  plain  |\n"));
 
-        $this->assertStringContainsString('style="background-color:' . $color . ';"', $cells[0]);
-        $this->assertStringNotContainsString('background-color', $cells[1]);
+        $this->assertStringContainsString($this->style($color), $cells[0]);
+        $this->assertStringNotContainsString('--plugin-cellbg', $cells[1]);
     }
 
     /**
@@ -114,7 +125,7 @@ class SyntaxTest extends DokuWikiTest
     {
         $xhtml = $this->render("|  {$syntax}content  |  plain  |\n");
 
-        $this->assertStringNotContainsString('background-color', $xhtml);
+        $this->assertStringNotContainsString('--plugin-cellbg', $xhtml);
         $this->assertStringContainsString($syntax . 'content', $xhtml);
     }
 
@@ -126,7 +137,7 @@ class SyntaxTest extends DokuWikiTest
         $cells = $this->cells($this->render("^  @red:content  ^  plain  ^\n|  a  |  b  |\n"));
 
         $this->assertStringStartsWith('<th', $cells[0]);
-        $this->assertStringContainsString('style="background-color:red;"', $cells[0]);
+        $this->assertStringContainsString($this->style('red'), $cells[0]);
     }
 
     /**
@@ -141,8 +152,8 @@ class SyntaxTest extends DokuWikiTest
         $cells = $this->cells($this->render($wiki, 'md+dw'));
 
         $this->assertStringStartsWith('<th', $cells[0]);
-        $this->assertStringContainsString('style="background-color:red;"', $cells[2]);
-        $this->assertStringNotContainsString('background-color', $cells[3]);
+        $this->assertStringContainsString($this->style('red'), $cells[2]);
+        $this->assertStringNotContainsString('--plugin-cellbg', $cells[3]);
     }
 
     /**
@@ -153,7 +164,7 @@ class SyntaxTest extends DokuWikiTest
         $cells = $this->cells($this->render("|  @red:**bold**  ||  plain  |\n"));
 
         $this->assertStringContainsString('colspan="2"', $cells[0]);
-        $this->assertStringContainsString('style="background-color:red;"', $cells[0]);
+        $this->assertStringContainsString($this->style('red'), $cells[0]);
     }
 
     /**
@@ -163,7 +174,7 @@ class SyntaxTest extends DokuWikiTest
     {
         $xhtml = $this->render("|  text @red:content  |  plain  |\n");
 
-        $this->assertStringNotContainsString('background-color', $xhtml);
+        $this->assertStringNotContainsString('--plugin-cellbg', $xhtml);
         $this->assertStringContainsString('@red:content', $xhtml);
     }
 
@@ -214,8 +225,8 @@ class SyntaxTest extends DokuWikiTest
         $xhtml = $this->render("|  {$syntax}content  |  plain  |\n");
         $cells = $this->cells($xhtml);
 
-        $this->assertSame(1, substr_count($cells[0], 'background-color'));
-        $this->assertStringContainsString('style="background-color:red;"', $cells[0]);
+        $this->assertSame(1, substr_count($cells[0], '--plugin-cellbg'));
+        $this->assertStringContainsString($this->style('red'), $cells[0]);
         $this->assertStringContainsString('@lime:content', $xhtml);
     }
 }
